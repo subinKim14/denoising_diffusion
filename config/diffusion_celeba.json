@@ -1,7 +1,7 @@
 {
 "dataset": {
     "name": "celeba",
-    "path": "/celeba_data/",
+    "path": "../celeba/img_align_celeba",
     "resolution": 128
 }
 ,
