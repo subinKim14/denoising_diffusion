@@ -5,17 +5,7 @@ import torch
 import numpy as np
 from torch import nn
 from torch.nn import functional as F
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 
-def exists(x):
-    return x is not None
-
-from inspect import isfunction
-def default(val, d):
-    if exists(val):
-        return val
-    return d() if isfunction(d) else d
 
 def make_beta_schedule(schedule, start, end, n_timestep):
     if schedule == "quad":
@@ -221,17 +211,6 @@ class GaussianDiffusion(nn.Module):
 
         return (sample, pred_x0) if return_pred_x0 else sample
 
-    def p_sample_org(self, model, x, t, noise_fn, clip_denoised=True, return_pred_x0=False):
-
-        mean, _, log_var, pred_x0 = self.p_mean_variance(model, x, t, clip_denoised, return_pred_x0=True)
-        noise                     = noise_fn(x.shape, dtype=x.dtype).to(x.device)
-
-        shape        = [x.shape[0]] + [1] * (x.ndim - 1)
-        nonzero_mask = (1 - (t == 0).type(torch.float32)).view(*shape).to(x.device)
-        sample       = x + nonzero_mask * torch.exp(0.5 * log_var) * noise
-
-        return (sample, pred_x0) if return_pred_x0 else sample
-
     @torch.no_grad()
     def p_sample_loop(self, model, shape, noise_fn=torch.randn):
 
@@ -275,123 +254,6 @@ class GaussianDiffusion(nn.Module):
             x0_preds_   = insert_mask * pred_x0[:, None, ...] + (1. - insert_mask) * x0_preds_
 
         return img, x0_preds_
-
-    @torch.no_grad()
-    def interpolate_p_sample(self, model, x, t, clip_denoised=True, repeat_noise=False):
-        b, *_, device = *x.shape, x.device
-        print(device)
-        #self.p_mean_variance(model, x, t, clip_denoised, return_pred_x0=True)
-        model_mean, _, model_log_variance = self.p_mean_variance(model, x, t, clip_denoised=clip_denoised, return_pred_x0=False)
-        noise = noise_like(x.shape, device, repeat_noise)
-        # no noise when t == 0
-        nonzero_mask = (1 - (t == 0).float()).reshape(b, *((1,) * (len(x.shape) - 1)))
-        return model_mean + nonzero_mask * (0.5 * model_log_variance).exp() * noise
-
-    @torch.no_grad()
-    def interpolate(self, model, image_1, image_2, t = None, lam = 0.5):
-        b, *_, device = *image_1.shape, image_1.device
-        t = default(t, self.num_timesteps - 1)
-
-        assert image_1.shape == image_2.shape
-
-        t_batched = torch.stack([torch.tensor(t, device=device)] * b)
-        xt1, xt2 = map(lambda x: self.q_sample(x, t=t_batched), (image_1, image_2))
-
-        img = (1 - lam) * xt1 + lam * xt2
-        img = xt1
-
-        for i in tqdm(reversed(range(0, t)), desc='interpolation sample time step', total=t):
-
-            # Sample p(x_{t-1} | x_t) as usual
-            img, pred_x0 = self.p_sample(model=model,
-                                         x=img,
-                                         t=torch.full((b,), i, dtype=torch.int64).to(device),
-                                         noise_fn=torch.randn,
-                                         return_pred_x0=True)
-        '''
-        for i in tqdm(reversed(range(0, t)), desc='interpolation sample time step', total=t):
-            img = self.interpolate_p_sample(model, img, torch.full((b,), i, device=device, dtype=torch.long))
-        '''
-        return img
-
-    @torch.no_grad()
-    def p_sample_loop_progressive_conditional(self, model, shape, device, noise_fn, img_start, t_start, include_x0_pred_freq=50):
-
-        (B, C, H, W), T = img_start.shape, self.num_timesteps
-
-        t_b = torch.full((B, ), self.num_timesteps-t_start, dtype=torch.int64)
-
-        tmp = self.q_sample(img_start, t=t_b)
-        '''
-        tmp = (tmp+1)/2
-        plt.imsave('./q_sample_0.png', tmp[0].clamp(min=0, max=1).cpu().numpy().transpose(1, 2, 0))
-        plt.imsave('./q_sample_1.png', tmp[1].clamp(min=0, max=1).cpu().numpy().transpose(1, 2, 0))
-        print(tmp.shape)
-        print(type(tmp))
-        exit()
-        '''
-        #img_start = tmp.clamp(min=0, max=1)
-        img_start = tmp
-
-        num_recorded_x0_pred = self.num_timesteps // include_x0_pred_freq
-        x0_preds_            = torch.zeros((shape[0], num_recorded_x0_pred, *shape[1:]), dtype=torch.float32).to(device)
-        x0_preds_with_original = torch.zeros((shape[0], num_recorded_x0_pred+2, *shape[1:]), dtype=torch.float32).to(device)
-
-        #scailing
-        '''
-        img_start = img_start*t_start/self.num_timesteps
-        '''
-        for i in range(shape[0]):
-            x0_preds_with_original[i, num_recorded_x0_pred+1, :, :, :] = img_start[i].clone().detach()
-
-
-        x=img_start
-        t=torch.full((shape[0],), self.num_timesteps-t_start, dtype=torch.int64).to(device)
-        mean, _, log_var1, pred_x0 = self.p_mean_variance(model, x, t, clip_denoised=True,return_pred_x0=True)
-        noise                     = noise_fn(x.shape, dtype=x.dtype).to(x.device)
-
-        shape_        = [x.shape[0]] + [1] * (x.ndim - 1)
-        nonzero_mask = (1 - (t == 0).type(torch.float32)).view(*shape_).to(x.device)
-
-        x=img_start+nonzero_mask * torch.exp(0.5 * log_var1) * noise
-        t=torch.full((shape[0],), self.num_timesteps-t_start, dtype=torch.int64).to(device)
-        mean, _, log_var, pred_x0 = self.p_mean_variance(model, x, t, clip_denoised=True,return_pred_x0=True)
-
-        noise                     = noise_fn(x.shape, dtype=x.dtype).to(x.device)
-
-        shape_        = [x.shape[0]] + [1] * (x.ndim - 1)
-        nonzero_mask = (1 - (t == 0).type(torch.float32)).view(*shape_).to(x.device)
-        
-
-        img       = mean + nonzero_mask * torch.exp(0.5 * log_var) * noise
-        #img       = img_start + nonzero_mask * torch.exp(0.5 * log_var) * noise
-        img  = img_start
-        for i in range(shape[0]):
-            x0_preds_with_original[i, num_recorded_x0_pred, :, :, :] = img[i].clamp(min=-1, max=1).clone().detach()
-
-
-        for i in reversed(range(self.num_timesteps-t_start)):
-
-            # Sample p(x_{t-1} | x_t) as usual
-            img, pred_x0 = self.p_sample(model=model,
-                                         x=img,
-                                         t=torch.full((shape[0],), i, dtype=torch.int64).to(device),
-                                         noise_fn=noise_fn,
-                                         return_pred_x0=True)
-
-            # Keep track of prediction of x0
-            insert_mask = np.floor(i // include_x0_pred_freq) == torch.arange(num_recorded_x0_pred,
-                                                                              dtype=torch.int32,
-                                                                              device=device)
-
-            insert_mask = insert_mask.to(torch.float32).view(1, num_recorded_x0_pred, *([1] * len(shape[1:])))
-            x0_preds_   = insert_mask * pred_x0[:, None, ...] + (1. - insert_mask) * x0_preds_
-
-        for i in range(shape[0]):
-            x0_preds_with_original[i, 0:num_recorded_x0_pred, :, :, :] = x0_preds_[i]
-          
-        return img, x0_preds_with_original
-
 
     # === Log likelihood calculation ===
 
