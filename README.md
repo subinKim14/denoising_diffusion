@@ -15,7 +15,13 @@ To install requirements:
 
 ```setup
 pip install -r requirements.txt
+conda env create --file DDPM.yaml
 ```
+
+## Pre-trained Models and Datasets for CelebA 128x128
+
+Pre-trained diffusion models on CelebA and Datasets for CelebA 128x128 (img_align_celeba.zip) can be found [here](https://drive.google.com/drive/folders/1LziVrfaoFZV6aUa7X9S768S_NS4SM-a9?usp=sharing).
+
 
 ## Training Diffusion Models
 
@@ -35,18 +41,24 @@ python diffusion_lightning.py --config config.json --model_dir MODEL_DIRECTORY -
 
 ## Conditional Sample Generation (CelebA 128x128)
 
+Before run below commands, 
+1) Two files (celeba.ckpt, img_align_celeba) should be downloaded from the below googld Drive.
+2) Unzip img_align_celeba.zip file.
+3) Please modify the below three scripts for your needs.
+
+```make original celebA 128 x 128 test datasets 
+python celebA.py
+```
+
+```make degraded celebA 128 x 128 test datasets 
+python degrade.py
+```
+
 To generate samples from a trained diffusion model specified by `config.json`, run this command:
 
 ```eval
 python conditional_sampling.py --config config.json --model_dir MODEL_DIRECTORY --sample_dir PATH_TO_SAVE_SAMPLES --orginal_dir PATH_TO_ORIGINAL_IMGS --degraded_dir PATH_TO_DEGRADED_IMGS
 ```
-```eval
-python conditional_sampling.py --config config.json --model_dir MODEL_DIRECTORY --sample_dir PATH_TO_SAVE_SAMPLES --orginal_dir PATH_TO_ORIGINAL_IMGS --degraded_dir PATH_TO_DEGRADED_IMGS
-```
-
-## Pre-trained Models
-
-Pre-trained diffusion models on CelebA and CIFAR-10 can be found [here](https://drive.google.com/drive/folders/1LziVrfaoFZV6aUa7X9S768S_NS4SM-a9?usp=sharing).
 
 ## CIFAR-10 FID Score
 
