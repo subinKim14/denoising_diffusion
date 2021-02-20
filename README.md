@@ -55,6 +55,7 @@ python degrade.py
 ```
 
 To generate samples from a trained diffusion model specified by `config.json`, run this command:
+for example) python conditional_sampling.py --config config/diffusion_celeba.json --model_dir ./celeba.ckpt --sample_dir tmp --original_dir data128x128 --degraded_dir data128x128_motion_1
 
 ```eval
 python conditional_sampling.py --config config.json --model_dir MODEL_DIRECTORY --sample_dir PATH_TO_SAVE_SAMPLES --original_dir PATH_TO_ORIGINAL_IMGS --degraded_dir PATH_TO_DEGRADED_IMGS
