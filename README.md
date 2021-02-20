@@ -33,9 +33,20 @@ To generate samples from a trained diffusion model specified by `config.json`, r
 python diffusion_lightning.py --config config.json --model_dir MODEL_DIRECTORY --sample_dir PATH_TO_SAVE_SAMPLES --n_samples NUM_SAMPLES
 ```
 
+## Conditional Sample Generation (CelebA 128x128)
+
+To generate samples from a trained diffusion model specified by `config.json`, run this command:
+
+```eval
+python conditional_sampling.py --config config.json --model_dir MODEL_DIRECTORY --sample_dir PATH_TO_SAVE_SAMPLES --orginal_dir PATH_TO_ORIGINAL_IMGS --degraded_dir PATH_TO_DEGRADED_IMGS
+```
+```eval
+python conditional_sampling.py --config config.json --model_dir MODEL_DIRECTORY --sample_dir PATH_TO_SAVE_SAMPLES --orginal_dir PATH_TO_ORIGINAL_IMGS --degraded_dir PATH_TO_DEGRADED_IMGS
+```
+
 ## Pre-trained Models
 
-Pre-trained diffusion models on CelebA and CIFAR-10 can be found [here](https://drive.google.com/drive/folders/1R8xmSjLSM1vXWpvZrv3mPE52ImCjVzxK?usp=sharing).
+Pre-trained diffusion models on CelebA and CIFAR-10 can be found [here](https://drive.google.com/drive/folders/1LziVrfaoFZV6aUa7X9S768S_NS4SM-a9?usp=sharing).
 
 ## CIFAR-10 FID Score
 
