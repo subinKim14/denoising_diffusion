@@ -1,0 +1,2 @@
+img_align_celeba.zip filter=lfs diff=lfs merge=lfs -text
+celeba.ckpt filter=lfs diff=lfs merge=lfs -text
