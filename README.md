@@ -1,6 +1,6 @@
 # Denosing Diffusion Generative Models
 
-This is an unofficial implementation of ["Denoising Diffusion Probabilistic Models"](https://arxiv.org/abs/2006.11239) in [PyTorch(Lightning)](https://github.com/PyTorchLightning/pytorch-lightning). For a brief introduction to diffusion models, see my [blog post](https://hmdolatabadi.github.io/posts/2020/09/ddp/).
+This is an unofficial implementation of ["Denoising Diffusion Probabilistic Models"](https://arxiv.org/abs/2006.11239) in [PyTorch(Lightning)](https://github.com/PyTorchLightning/pytorch-lightning). For a brief introduction to diffusion models, see [blog post](https://hmdolatabadi.github.io/posts/2020/09/ddp/).
 
 <p align="center">
   <img width="522" height="132" src="/misc/DDP.gif">
@@ -66,4 +66,4 @@ In the paper, the authors perform model selection using the FID score. Here, how
 
 ## Acknowledgement
 
-This repository is built upon the [official repository of diffusion models in TensorFlow](https://github.com/hojonathanho/diffusion) as well as parts of [this unofficial PyTorch implementation](https://github.com/rosinality/denoising-diffusion-pytorch).
+This repository is built upon the [official repository of diffusion models in TensorFlow](https://github.com/hojonathanho/diffusion) as well as parts of [this unofficial PyTorch implementation](https://github.com/rosinality/denoising-diffusion-pytorch) and [this unofficial PyTorch Lightening implementation](https://github.com/hmdolatabadi/denoising_diffusion).
