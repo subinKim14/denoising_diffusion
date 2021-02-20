@@ -57,7 +57,7 @@ python degrade.py
 To generate samples from a trained diffusion model specified by `config.json`, run this command:
 
 ```eval
-python conditional_sampling.py --config config.json --model_dir MODEL_DIRECTORY --sample_dir PATH_TO_SAVE_SAMPLES --orginal_dir PATH_TO_ORIGINAL_IMGS --degraded_dir PATH_TO_DEGRADED_IMGS
+python conditional_sampling.py --config config.json --model_dir MODEL_DIRECTORY --sample_dir PATH_TO_SAVE_SAMPLES --original_dir PATH_TO_ORIGINAL_IMGS --degraded_dir PATH_TO_DEGRADED_IMGS
 ```
 
 ## CIFAR-10 FID Score
