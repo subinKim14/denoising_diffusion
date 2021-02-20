@@ -42,7 +42,7 @@ python diffusion_lightning.py --config config.json --model_dir MODEL_DIRECTORY -
 ## Conditional Sample Generation (CelebA 128x128)
 
 Before run below commands, 
-1) Two files (celeba.ckpt, img_align_celeba) should be downloaded from the below googld Drive.
+1) Two files (celeba.ckpt, img_align_celeba) should be downloaded from the above google Drive.
 2) Unzip img_align_celeba.zip file.
 3) Please modify the below three scripts for your needs.
 
