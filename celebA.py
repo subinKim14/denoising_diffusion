@@ -83,7 +83,7 @@ if __name__ == '__main__':
         os.mkdir(output_dir)
 
     # modify the configuration file path here.
-    path_to_config = '../config/diffusion_celeba.json'
+    path_to_config = './config/diffusion_celeba.json'
     with open(path_to_config, 'r') as f:
         conf = json.load(f)
 
